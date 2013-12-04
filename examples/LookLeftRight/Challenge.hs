@@ -35,11 +35,24 @@ atan_h x = (0.5) * (log(x + 1) - log(1 - x))
         I used tuple selectors instead of pattern matching because there are weird lifting/unlifting issues with pattern matching that I'm still learning.     
         
 -}                            
-ne_attempt ::  Acc (A.Array  DIM2 ((Int,Int), Double)) -> Acc (A.Array  DIM2 ((Int,Int), Double))   
-ne_attempt amat = generate (index2 rows cols) (\ix -> let (Z:.y:.x) = unlift ix :: Z :. Exp Int :. Exp Int in  (lift ((y,x), (neighbor_product amat y))) :: Exp((Int,Int), Double))
+ne_attempt :: Acc (A.Array  DIM2 ((Int,Int), Double)) 
+	   -> Acc (A.Array  DIM2 ((Int,Int), Double))   
+ne_attempt amat = generate (index2 rows cols) $ \ix -> 
+
+	   let (Z:.y:.x) = unlift ix :: Z :. Exp Int :. Exp Int 
+	   in  (lift ((y,x), (neighbor_product amat y))) :: Exp((Int,Int), Double)
+
         where Z :. rows :. cols = unlift (shape amat) :: Z :. Exp Int :. Exp Int
-              neighbor_product :: Acc(A.Array DIM2  ((Int,Int), Double)) -> Exp Int -> Exp Double
-              neighbor_product mat arg = the (A.fold1 (*) $ A.snd $ (lift (A.unzip $ A.filter (\tup -> ((A.snd . A.fst) tup) /=* arg)
-                            (takeRow arg amat)) :: Acc(A.Array DIM1 (Int, Int), A.Array DIM1 Double)))
+              neighbor_product :: Acc(A.Array DIM2  ((Int,Int), Double)) 
+	      		       -> Exp Int 
+			       -> Exp Double
+              neighbor_product mat arg = 
+	      	   the (A.fold1 (*) 
+		       $ A.snd 
+		       $ (lift (A.unzip $ A.filter (\tup -> ((A.snd . A.fst) tup) /=* arg)
+		                                   (takeRow arg amat)) :: Acc(A.Array DIM1 (Int, Int), A.Array DIM1 Double))
+		       )
+						   	    
                             
 main = print $ ne_attempt $ A.zip (genIndices accmat) accmat                             
+
