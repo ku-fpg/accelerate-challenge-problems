@@ -11,12 +11,12 @@ accmat = use $ fromList (Z :. 5 :. 5) [1..25] :: Acc(A.Array DIM2 Double)
 accvec = use $ fromList(Z :. 5) [1..25] :: Acc(A.Array DIM1 Double)
 
 -- This function was lifted from Trevor McDonell's slides @ http://www.cse.unsw.edu.au/~tmcdonell/presentations/2013-lambdajam-workshop.pdf
-takeRow	::	Exp	Int	->	Acc	(A.Array	DIM2	((Int,Int), Double))	->	Acc	(A.Vector	((Int,Int), Double))
-takeRow	n	mat	=
-		let	Z	:.	_	:.	cols	=	unlift	(shape	mat)	::	Z:.	Exp	Int	:.	Exp	Int
-		in	backpermute	(index1	cols)
-						(\ix	->	index2	n	(unindex1	ix))
-						mat                      
+takeRow :: Exp Int -> Acc (A.Array DIM2 ((Int,Int), Double)) -> Acc (A.Vector ((Int,Int), Double))
+takeRow n mat =
+  let Z :. _ :. cols = unlift (shape mat) :: Z:. Exp Int :. Exp Int
+  in backpermute (index1 cols)
+      (\ix -> index2 n (unindex1 ix))
+      mat                      
 
 
 genIndices :: Acc(A.Array DIM2 Double) -> Acc(A.Array DIM2 (Int, Int))
@@ -35,7 +35,7 @@ atan_h x = (0.5) * (log(x + 1) - log(1 - x))
         I used tuple selectors instead of pattern matching because there are weird lifting/unlifting issues with pattern matching that I'm still learning.     
         
 -}                            
-ne_attempt ::  Acc	(A.Array  DIM2	((Int,Int), Double)) -> Acc	(A.Array  DIM2	((Int,Int), Double))   
+ne_attempt ::  Acc (A.Array  DIM2 ((Int,Int), Double)) -> Acc (A.Array  DIM2 ((Int,Int), Double))   
 ne_attempt amat = generate (index2 rows cols) (\ix -> let (Z:.y:.x) = unlift ix :: Z :. Exp Int :. Exp Int in  (lift ((y,x), (neighbor_product amat y))) :: Exp((Int,Int), Double))
         where Z :. rows :. cols = unlift (shape amat) :: Z :. Exp Int :. Exp Int
               neighbor_product :: Acc(A.Array DIM2  ((Int,Int), Double)) -> Exp Int -> Exp Double
